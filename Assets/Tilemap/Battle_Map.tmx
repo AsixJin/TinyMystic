@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.0.2" orientation="orthogonal" renderorder="right-down" width="10" height="9" tilewidth="16" tileheight="16" nextobjectid="1">
+ <tileset firstgid="1" source="../../../../../Tiled/basic_terrain.tsx"/>
+ <imagelayer name="Image Layer 1">
+  <image source="../Graphics/backdrop_1.png" width="160" height="144"/>
+ </imagelayer>
+ <layer name="Tile Layer 1" width="10" height="9">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+26,38,26,26,38,38,38,26,38,38,
+50,50,50,50,50,50,50,50,50,50,
+50,50,50,50,50,50,50,50,50,50,
+50,50,50,50,50,50,50,50,50,50
+</data>
+ </layer>
+</map>

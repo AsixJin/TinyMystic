@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class BattleStats : BattleTarget {
     
-    protected int health;
-    protected int energy;
-    protected int power;
-    protected int defense;
-    protected int speed;
+    public int health;
+    public int energy;
+    public int power;
+    public int defense;
+    public int speed;
     
 }

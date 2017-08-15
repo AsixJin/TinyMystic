@@ -10,7 +10,7 @@ public class BattleManager : MonoBehaviour{
 	
 	// Use this for initialization
 	void Start () {
-		
+		PositionEnemies();
 	}
 	
 	// Update is called once per frame
@@ -20,12 +20,13 @@ public class BattleManager : MonoBehaviour{
 
 	void PositionEnemies(){
 		numOfEnemies = GameManager.instance.enemyGroup.Count;
-		String positionPrefab = "_assets/Resources/Markers/EnemyGroup" + numOfEnemies;
+		String positionPrefab = "Markers/EnemyGroup" + numOfEnemies;
 		GameObject positionMarkers = Resources.Load(positionPrefab, typeof(GameObject)) as GameObject;
 		Instantiate(positionMarkers);
 		for (int i = 0; i < numOfEnemies; i++){
-			GameObject marker = positionMarkers.transform.FindChild("Marker" + i).gameObject;
-			Instantiate(GameManager.instance.enemyGroup[i], marker.transform.position, Quaternion.identity);
+			GameObject marker = GameObject.Find("Marker" + (i+1));
+			GameObject enemy = GameManager.instance.enemyGroup[i].gameObject; 
+			Instantiate(enemy, marker.transform.position, Quaternion.identity);
 		}
 	}
 }

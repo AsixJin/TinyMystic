@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour{
 	public int playerEnergy = 10;
 	
 	//Battle Related
-	public List<BattleTarget> enemyGroup;
+	public List<BattleStats> enemyGroup;
 
 	private void Awake(){
 		if (instance != null){
@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour{
 		gameTimer += Time.deltaTime;
 	}
 
-	public void startBattle(List<BattleTarget> enemies){
+	public void startBattle(List<BattleStats> enemies){
 		enemyGroup = enemies;
 		SceneManager.LoadScene("BattleScene");
 	}

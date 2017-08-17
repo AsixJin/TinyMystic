@@ -7,7 +7,7 @@ public class EnemySpawner : MonoBehaviour{
     public List<BattleStats> enemies = new List<BattleStats>();
     
     private void OnTriggerStay2D(Collider2D other){
-        if (BattleUtils.battleCheck()){
+        if (Input.GetButtonDown(ControlConst.BUTTON_A)){
             generateEnemyGroup();
             Debug.Log("Battle Start");
         }

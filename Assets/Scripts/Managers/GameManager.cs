@@ -16,13 +16,11 @@ public class GameManager : MonoBehaviour{
 	
 	//Player Information
 	public GameObject playerObject;
-	public String playerName = "";
-	public int playerLevel = 1;
-	public int playerHealth = 50;
-	public int playerEnergy = 10;
+	public BattleStats playerStats;
 	
 	//Battle Related
 	public bool inBattle = false;
+	public BattleManager battleManager;
 	public List<BattleStats> enemyGroup;
 
 	private void Awake(){
@@ -82,6 +80,9 @@ public class GameManager : MonoBehaviour{
 	}
 
 	void SetupBattleScene(){
-		BattleManager.instance.fourthButton.onClick.AddListener(endBattle);
+		battleManager = GameObject.Find("BManager").GetComponent<BattleManager>();
+		battleManager.FourthButton.onClick.AddListener(endBattle);
 	}
+	
+	
 }

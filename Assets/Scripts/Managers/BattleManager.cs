@@ -6,23 +6,17 @@ using UnityEngine.UI;
 
 public class BattleManager : MonoBehaviour{
 
-	public static BattleManager instance;
-
 	public BattleState battleState = BattleState.playerAction;
 	public int numOfEnemies = 0;
 	
 	// UI Elements
 	public Button FirstButton;
-	public Button secondButton;
-	public Button thirdButton;
-	public Button fourthButton;
-
-	private void Awake(){
-		instance = this;
-	}
+	public Button SecondButton;
+	public Button ThirdButton;
+	public Button FourthButton;
 
 	// Use this for initialization
-	void Start () {
+	void Start (){
 		PositionEnemies();
 	}
 	
@@ -56,4 +50,5 @@ public class BattleManager : MonoBehaviour{
 	void SwitchState(int state){
 		battleState = (BattleState) state;
 	}
+		
 }

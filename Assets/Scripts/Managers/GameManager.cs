@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour{
 	//Player Information
 	public GameObject playerObject;
 	public BattleStats playerStats;
+	public int maxCombo = 3;
 	
 	//Battle Related
 	public bool inBattle = false;
@@ -81,7 +82,7 @@ public class GameManager : MonoBehaviour{
 
 	void SetupBattleScene(){
 		battleManager = GameObject.Find("BManager").GetComponent<BattleManager>();
-		battleManager.FourthButton.onClick.AddListener(endBattle);
+		battleManager.AddButtonAction(3, endBattle);
 	}
 	
 	

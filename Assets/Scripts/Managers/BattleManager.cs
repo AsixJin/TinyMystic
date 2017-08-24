@@ -14,12 +14,16 @@ public class BattleManager : MonoBehaviour{
 	
 	// UI Elements
 	private CanvasGroup OptionCanvas;
-	private CanvasGroup ComboCanvas;
+	private CanvasGroup ComboCanvas; //Also the panel for the ComboCommands
+
+	private GameObject comboCommand;
 	
 	private Button FirstButton;
 	private Button SecondButton;
 	private Button ThirdButton;
 	private Button FourthButton;
+
+	public GameObject comboBar;
 
 	private void Awake(){
 		OptionCanvas = GameObject.Find("Options Canvas").GetComponent<CanvasGroup>();
@@ -106,8 +110,6 @@ public class BattleManager : MonoBehaviour{
 		UIUtils.showCanvas(targetCanvas);
 
 	}
-
-	
 	
 	void ActivateComboBar(){
 		SwitchMenus(OptionCanvas, ComboCanvas);
@@ -122,11 +124,23 @@ public class BattleManager : MonoBehaviour{
 	void AddComboStr(ComboStr comboStr){
 		if (playerCombo.Count != GameManager.instance.maxCombo){
 			playerCombo.Add(comboStr);
+			AddCommandUI(comboStr.ToString().Substring(0,1).ToUpper());
 		}
 	}
 
 	void RemoveComboStr(){
 		playerCombo.RemoveAt(playerCombo.Count-1);
+		RemoveCommandUI();
+	}
+
+	void AddCommandUI(String command){
+		GameObject commandBar = Instantiate(comboBar, new Vector3(0, 0, 0), Quaternion.identity);
+		commandBar.transform.SetParent(ComboCanvas.transform);
+		commandBar.transform.GetChild(0).GetComponent<Text>().text = command;
+	}
+
+	void RemoveCommandUI(){
+		Destroy(ComboCanvas.transform.GetChild(ComboCanvas.transform.childCount - 1).gameObject);
 	}
 	
 	//Button Getters

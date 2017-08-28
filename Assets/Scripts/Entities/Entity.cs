@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class Entity : MonoBehaviour{
 
-	protected string name;
+	protected string entityName;
 	
 }

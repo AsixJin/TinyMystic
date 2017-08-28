@@ -7,5 +7,6 @@ public enum PlayerAction {
     combo=1,
     skill=2,
     items=3,
-    run=4
+    run=4,
+    targeting=5
 }

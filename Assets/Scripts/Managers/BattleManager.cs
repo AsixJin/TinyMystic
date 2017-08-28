@@ -70,14 +70,17 @@ public class BattleManager : MonoBehaviour{
 	void HandlePlayerAction(){
 		if (playerAction == PlayerAction.deciding){
 			
+		}else if (playerAction == PlayerAction.targeting){
+			
 		}else if (playerAction == PlayerAction.combo){
 			//Pressing back will cancel combo commmands
 			//or return player to options menu
 			if (Input.GetButtonDown(ControlConst.BUTTON_B)){
 				if (playerCombo.Count != 0){
 					RemoveComboStr();
-				}else{
-					DeactivateComboBar();	
+				}
+				else{
+					DeactivateComboBar();
 				}
 			}
 			//Up inputs High Command
@@ -92,13 +95,10 @@ public class BattleManager : MonoBehaviour{
 			if (Input.GetButtonDown(ControlConst.DPAD_DOWN)){
 				AddComboStr(ComboStr.low);
 			}
-		}else if (playerAction == PlayerAction.skill){
-			
-		}else if (playerAction == PlayerAction.items){
-			
-		}else if (playerAction == PlayerAction.run){
-			
 		}
+		else if (playerAction == PlayerAction.skill){ }
+		else if (playerAction == PlayerAction.items){ }
+		else if (playerAction == PlayerAction.run){ }
 	}
 	
 	void SwitchState(int state){

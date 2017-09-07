@@ -11,7 +11,7 @@ public class BattleManager : MonoBehaviour{
 	//Canvas
 	private CanvasGroup OptionCanvas;
 	private CanvasGroup ComboCanvas; //Also the panel for the ComboCommands
-	private CanvasGroup SelectionCanvas;
+	private SelectionCanvas SelectionCanvas;
 	//Buttons
 	private Button FirstButton;
 	private Button SecondButton;
@@ -33,7 +33,8 @@ public class BattleManager : MonoBehaviour{
 	private void Awake(){
 		OptionCanvas = GameObject.Find("Options Canvas").GetComponent<CanvasGroup>();
 		ComboCanvas = GameObject.Find("Combo Canvas").GetComponent<CanvasGroup>();
-		SelectionCanvas = GameObject.Find("Selection Canvas").GetComponent<CanvasGroup>();
+		SelectionCanvas = GameObject.Find("Selection Canvas").GetComponent<SelectionCanvas>();
+		
 		FirstButton = GameObject.Find("First Button").GetComponent<Button>();
 		FirstButton.onClick.AddListener(ActivateComboBar);
 		SecondButton = GameObject.Find("Second Button").GetComponent<Button>();
@@ -67,7 +68,22 @@ public class BattleManager : MonoBehaviour{
 		if (playerAction == PlayerAction.deciding){
 			
 		}else if (playerAction == PlayerAction.targeting){
-			
+			//Confirm Selection
+			if (Input.GetButtonDown(ControlConst.BUTTON_A)){
+				Debug.Log("Selection Confirmed");
+			}
+			//Cancel out and go back
+			if (Input.GetButtonDown(ControlConst.BUTTON_B)){
+				DeactivatePlayerTargeting();
+			}
+			//Navigate back
+			if (Input.GetButtonDown(ControlConst.DPAD_LEFT)){
+				SelectionCanvas.cycleBack();
+			}
+			//Navigate Forward
+			if (Input.GetButtonDown(ControlConst.DPAD_RIGHT)){
+				SelectionCanvas.cycleForward();
+			}
 		}else if (playerAction == PlayerAction.combo){
 			//Pressing back will cancel combo commmands
 			//or return player to options menu
@@ -90,6 +106,12 @@ public class BattleManager : MonoBehaviour{
 			//Down inputs Low Command
 			if (Input.GetButtonDown(ControlConst.DPAD_DOWN)){
 				AddComboStr(ComboStr.low);
+			}
+			//Confirm Combo and move to targeting
+			if (Input.GetButtonDown(ControlConst.BUTTON_A)){
+				if (ConfirmCombo()){
+					ActivatePlayerTargeting();
+				}
 			}
 		}
 		else if (playerAction == PlayerAction.skill){ }
@@ -123,7 +145,34 @@ public class BattleManager : MonoBehaviour{
 		SwitchMenus(ComboCanvas, OptionCanvas);
 		playerAction = PlayerAction.deciding;
 	}
+
+	//Switches from the combo bar to the target menu
+	//Switches player state to targeting
+	void ActivatePlayerTargeting(){
+		SwitchMenus(ComboCanvas, SelectionCanvas.GetCanvasGroup());
+		//TODO Add target type to list
+		SelectionCanvas.initSelection(GenerateTargetOptions());
+		playerAction = PlayerAction.targeting;
+	}
+
+	/// <summary>
+	/// Switches from the target menu back to the combo bar
+	/// Switches player state to combo
+	/// </summary>
+	void DeactivatePlayerTargeting(){
+		SwitchMenus(SelectionCanvas.GetCanvasGroup(), ComboCanvas);
+		//SelectionCanvas.GetComponent<Dropdown>().options = null;
+		playerAction = PlayerAction.combo;
+	}
 	
+	//TODO Make it so different types of targets can be pulled
+	/// <summary>
+	/// Returns battlestats
+	/// </summary>
+	/// <returns>List<BattleStats></returns>
+	List<BattleStats> GenerateTargetOptions(){
+		return GameManager.instance.enemyGroup;
+	}
 	
 	//[UI] Generates a new command tab for the combo bar
 	void AddCommandUI(String command){
@@ -166,6 +215,17 @@ public class BattleManager : MonoBehaviour{
 		RemoveCommandUI();
 	}
 
+	/* This method will confirm the player's combo, which
+		at the moment just checks to see if the combo is
+		full. It returns true if valid.
+	*/
+	bool ConfirmCombo(){
+		if (playerCombo.Count == GameManager.instance.maxCombo){
+			return true;
+		}else{
+			return false;
+		}
+	}
 	
 	//Gets one of the four menu buttons and adds an acttion
 	//to it's listener

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using NUnit.Framework.Constraints;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -11,7 +12,7 @@ public class BattleManager : MonoBehaviour{
 	//Canvas
 	private CanvasGroup OptionCanvas;
 	private CanvasGroup ComboCanvas; //Also the panel for the ComboCommands
-	private SelectionCanvas SelectionCanvas;
+	private SelectCanvas selectionCanvas;
 	//Buttons
 	private Button FirstButton;
 	private Button SecondButton;
@@ -26,6 +27,9 @@ public class BattleManager : MonoBehaviour{
 	public PlayerAction playerAction = PlayerAction.deciding;
 	
 	//Battle Information
+	public BattleStats playerStats;
+	public List<BattleStats> enemyStats = new List<BattleStats>();
+	public List<TurnOrder> orderList = new List<TurnOrder>();
 	public List<ComboStr> playerCombo = new List<ComboStr>();
 	public int numOfEnemies = 0;
 
@@ -33,7 +37,7 @@ public class BattleManager : MonoBehaviour{
 	private void Awake(){
 		OptionCanvas = GameObject.Find("Options Canvas").GetComponent<CanvasGroup>();
 		ComboCanvas = GameObject.Find("Combo Canvas").GetComponent<CanvasGroup>();
-		SelectionCanvas = GameObject.Find("Selection Canvas").GetComponent<SelectionCanvas>();
+		selectionCanvas = GameObject.Find("Selection Canvas").GetComponent<SelectCanvas>();
 		
 		FirstButton = GameObject.Find("First Button").GetComponent<Button>();
 		FirstButton.onClick.AddListener(ActivateComboBar);
@@ -45,6 +49,7 @@ public class BattleManager : MonoBehaviour{
 	// Use this for initialization
 	void Start (){
 		PositionEnemies();
+		playerStats = GameManager.instance.playerStats;
 	}
 	
 	// Update is called once per frame
@@ -58,9 +63,9 @@ public class BattleManager : MonoBehaviour{
 		if (battleState == BattleState.playerAction){
 			HandlePlayerAction();
 		}else if (battleState == BattleState.enemyAction){
-			
+			//TODO Enemy AI scripting
 		}else if (battleState == BattleState.resolveTurn){
-			
+			//TODO Resolve Turn
 		}
 	}
 
@@ -70,7 +75,13 @@ public class BattleManager : MonoBehaviour{
 		}else if (playerAction == PlayerAction.targeting){
 			//Confirm Selection
 			if (Input.GetButtonDown(ControlConst.BUTTON_A)){
-				Debug.Log("Selection Confirmed");
+				Debug.Log("Selection Confirmed: " + selectionCanvas.getSelection().name);
+				//TODO Bundle Turn
+				orderList.Add(new TurnOrder(playerStats, selectionCanvas.getSelection(), playerCombo));
+				UIUtils.hideCanvas(selectionCanvas.mCanvasGroup);
+				//TODO Implemenent enemy action phase
+				//For now we'll skip enemy action phase
+				resolveTurn();
 			}
 			//Cancel out and go back
 			if (Input.GetButtonDown(ControlConst.BUTTON_B)){
@@ -78,11 +89,11 @@ public class BattleManager : MonoBehaviour{
 			}
 			//Navigate back
 			if (Input.GetButtonDown(ControlConst.DPAD_LEFT)){
-				SelectionCanvas.cycleBack();
+				selectionCanvas.cycleBack();
 			}
 			//Navigate Forward
 			if (Input.GetButtonDown(ControlConst.DPAD_RIGHT)){
-				SelectionCanvas.cycleForward();
+				selectionCanvas.cycleForward();
 			}
 		}else if (playerAction == PlayerAction.combo){
 			//Pressing back will cancel combo commmands
@@ -122,6 +133,29 @@ public class BattleManager : MonoBehaviour{
 	void SwitchState(int state){
 		battleState = (BattleState) state;
 	}
+
+	void startNewTurn(){
+		orderList.Clear();
+		playerCombo.Clear();
+		RemoveAllCommandUI();
+		playerAction = PlayerAction.deciding;
+		UIUtils.showCanvas(OptionCanvas);
+		battleState = BattleState.playerAction;
+	}
+	
+	void resolveTurn(){
+		battleState = BattleState.resolveTurn;
+		foreach (TurnOrder order in orderList){
+			enemyStats.Remove(order.Target);
+			Destroy(order.Target.gameObject);
+			numOfEnemies--;
+		}
+		if (numOfEnemies == 0){
+			GameManager.instance.endBattle();	
+		}else{
+			startNewTurn();	
+		}
+	}
 	#endregion
 	
 	#region UI Methods
@@ -149,9 +183,9 @@ public class BattleManager : MonoBehaviour{
 	//Switches from the combo bar to the target menu
 	//Switches player state to targeting
 	void ActivatePlayerTargeting(){
-		SwitchMenus(ComboCanvas, SelectionCanvas.GetCanvasGroup());
+		SwitchMenus(ComboCanvas, selectionCanvas.GetCanvasGroup());
 		//TODO Add target type to list
-		SelectionCanvas.initSelection(GenerateTargetOptions());
+		selectionCanvas.initSelection(GenerateTargetOptions());
 		playerAction = PlayerAction.targeting;
 	}
 
@@ -160,7 +194,7 @@ public class BattleManager : MonoBehaviour{
 	/// Switches player state to combo
 	/// </summary>
 	void DeactivatePlayerTargeting(){
-		SwitchMenus(SelectionCanvas.GetCanvasGroup(), ComboCanvas);
+		SwitchMenus(selectionCanvas.GetCanvasGroup(), ComboCanvas);
 		//SelectionCanvas.GetComponent<Dropdown>().options = null;
 		playerAction = PlayerAction.combo;
 	}
@@ -171,7 +205,7 @@ public class BattleManager : MonoBehaviour{
 	/// </summary>
 	/// <returns>List<BattleStats></returns>
 	List<BattleStats> GenerateTargetOptions(){
-		return GameManager.instance.enemyGroup;
+		return enemyStats;
 	}
 	
 	//[UI] Generates a new command tab for the combo bar
@@ -185,8 +219,31 @@ public class BattleManager : MonoBehaviour{
 	void RemoveCommandUI(){
 		Destroy(ComboCanvas.transform.GetChild(ComboCanvas.transform.childCount - 1).gameObject);
 	}
-	#endregion
+
+	void RemoveAllCommandUI(){
+		for (int i = 0; i < ComboCanvas.transform.childCount; i++){
+			Destroy(ComboCanvas.transform.GetChild(i).gameObject);
+		}
+	}
 	
+	//Gets one of the four menu buttons and adds an acttion
+	//to it's listener
+	public void AddButtonAction(int button, UnityAction action){
+		if (button == 0){
+			FirstButton.onClick.AddListener(action);
+		}else if (button == 1){
+			SecondButton.onClick.AddListener(action);
+		}else if (button == 2){
+			ThirdButton.onClick.AddListener(action);
+		}else if (button == 3){
+			FourthButton.onClick.AddListener(action);
+		}else{
+			Debug.Log("Not a valid button.");
+		}
+	}
+	#endregion
+
+	#region Misc Methods
 	//This will simply place the enemies where they need
 	//to be in battle.
 	void PositionEnemies(){
@@ -196,8 +253,9 @@ public class BattleManager : MonoBehaviour{
 		Instantiate(positionMarkers);
 		for (int i = 0; i < numOfEnemies; i++){
 			GameObject marker = GameObject.Find("Marker" + (i+1));
-			GameObject enemy = GameManager.instance.enemyGroup[i].gameObject; 
-			Instantiate(enemy, marker.transform.position, Quaternion.identity);
+			GameObject enemy = Instantiate(GameManager.instance.enemyGroup[i].gameObject, marker.transform.position, Quaternion.identity);
+			enemyStats.Add(enemy.GetComponent<BattleStats>());
+			//Instantiate(enemy, marker.transform.position, Quaternion.identity);
 		}
 	}
 	
@@ -226,20 +284,6 @@ public class BattleManager : MonoBehaviour{
 			return false;
 		}
 	}
+	#endregion
 	
-	//Gets one of the four menu buttons and adds an acttion
-	//to it's listener
-	public void AddButtonAction(int button, UnityAction action){
-		if (button == 0){
-			FirstButton.onClick.AddListener(action);
-		}else if (button == 1){
-			SecondButton.onClick.AddListener(action);
-		}else if (button == 2){
-			ThirdButton.onClick.AddListener(action);
-		}else if (button == 3){
-			FourthButton.onClick.AddListener(action);
-		}else{
-			Debug.Log("Not a valid button.");
-		}
-	}
 }
